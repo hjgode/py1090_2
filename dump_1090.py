@@ -3,6 +3,7 @@ from py1090.message import *
 from py1090.collection import *
 from py1090.helpers import *
 from py1090.fhem import *
+from py1090.serial_data import *
 
 #import py1090
 #import helpers 
@@ -46,6 +47,10 @@ def getnearest(_flightcollection):
     return mynearest
 
 def record_positions_to_file(filename):
+    
+    serialdata=SerialData("/home/hgode/USBtty1")
+    serialdata.startreading()
+    
     collection = FlightCollection()
     starttime = time()
     myLat = 51.0991

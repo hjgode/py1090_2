@@ -2,6 +2,7 @@ from enum import Enum
 from datetime import datetime
 from .helpers import *
 import math
+from .serial_data import *
 
 #lat and long of local position
 myLat = 51.0991
@@ -147,7 +148,12 @@ class Message:
 		on_ground (bool): Flag to indicate ground squat switch is active.
 	"""
 
+	@property
+	def _noise(self,value):
+		self.noise=value
+		
 	def __init__(self):
+
 		self.message_type = None
 		self.transmission_type = None
 		self.session_id = None
@@ -170,7 +176,8 @@ class Message:
 		self.on_ground = None
 		self.distance = None       #added calulated distance from given position
 		self.abs_distance = None   #added calculated view distance to given position
-
+		self.noise=None
+		
 	def parse_string(self, string):
 		parts = string.strip().split(',')
 
@@ -228,7 +235,7 @@ class Message:
 				self.distance = _distance(self.latitude, self.longitude)
 			
 			if self.altitude and self.distance:
-				self.abs_distance = _abs_distance(self.distance, self.altitude)	
+				self.abs_distance = _abs_distance(self.distance, self.altitude)    
 				
 			if parts[16]:
 				self.vertical_rate = int(parts[16])

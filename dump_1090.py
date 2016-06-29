@@ -3,14 +3,24 @@ from py1090.message import *
 from py1090.collection import *
 from py1090.helpers import *
 from py1090.fhem import *
-from py1090.serial_data import *
 
 #import py1090
 #import helpers 
 import datetime
 from time import time
 # needs python3, python2.x will not work
+
+USE_SERIAL=True #False #use serial port to read noise data
+SERIAL_PORT="/dev/pts/3"
         
+USE_FHEM=True #use telnet to update noise data within fhem
+MAX_DISTANCE=100 #km distance to record
+UPDATE_INTERVAL=5 #minutes to update log file
+CLEANUP_TIMEOUT=5 #minutes a flight has to be last seen before cleanup
+#local position
+myLat = 51.0991
+myLon = 6.5095
+
 def cleanup(_flightcollection, _record_time):
     """find flights which last_seen older than 5 minutes and clean this
     returns Nothing
@@ -20,7 +30,7 @@ def cleanup(_flightcollection, _record_time):
         if f.last_seen:
             #print("last_seen: ", f.last_seen, datetime.datetime.now())
             tdiff=_record_time - f.last_seen
-            if tdiff > datetime.timedelta(minutes=1):
+            if tdiff > datetime.timedelta(minutes=CLEANUP_TIMEOUT):
                 print("---- remove: ", f.hexident)
                 toremove.append(f.hexident)
     for i in toremove:
@@ -48,14 +58,16 @@ def getnearest(_flightcollection):
 
 def record_positions_to_file(filename):
     
-    serialdata=SerialData("/home/hgode/USBtty1")
-    serialdata.startreading()
-    
     collection = FlightCollection()
     starttime = time()
-    myLat = 51.0991
-    myLon = 6.5095
     minAlt = 100000
+    if USE_SERIAL:
+       try:
+          serialdata=SerialData(SERIAL_PORT)
+          serialdata.startreading()
+       except:
+          print("Serial Init failed")
+	  
     with Connection("atom2", 30003) as connection, open(filename, 'a') as file, open('message.log', 'a') as logmsg:
         lines = 0
         for line in connection:
@@ -71,7 +83,7 @@ def record_positions_to_file(filename):
                kmdistance = distance_between(myLat, myLon, message.latitude, message.longitude) / 1000
                skm = (' dist: %.2f km' % kmdistance).replace(',','.')
                print (skm)
-               if kmdistance < 1000:
+               if kmdistance < MAX_DISTANCE:
                    # 2014-12-05_07:10:58 flugdaten anzahl:23
                    sDateTime = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
                    sAlt=" alt: "
@@ -92,17 +104,22 @@ def record_positions_to_file(filename):
                #get flight with nearest view distance
                mynearest=getnearest(collection)
                if mynearest:
+                   if USE_SERIAL:
+                      
+                      mynearest._noise=serialdata.get_noiselevel()
+			 
                    ndist, hid = mynearest.nearest()
-                   print("nearest: ", mynearest.hexident, mynearest.callsign, ndist)
+                   print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest._noise)
                    #print("flight: ", flight)
                    #path = list(flight.path)
                end_time = time()
                time_taken = end_time - starttime # time_taken is in seconds
                hours, rest = divmod(time_taken,3600)
                minutes, seconds = divmod(rest, 60)
-               if minutes >= 1: #5:
+               if minutes >= UPDATE_INTERVAL: #5:
                    if mynearest:
-                       senddata(mynearest.callsign, ndist, 70)
+                       if USE_FHEM:
+                           senddata(mynearest.callsign, ndist, mynearest.noise)
                    starttime=time()
                    file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + '\n')
                    file.flush()

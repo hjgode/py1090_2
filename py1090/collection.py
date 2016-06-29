@@ -117,6 +117,14 @@ class FlightCollectionEntry:
 		return min_v, fid
 
 	@property
+	def noise(self):
+		noisemax=0
+		for message in self.messages:
+			if message.noise and message.noise > noisemax:
+				noisemax=message.noise
+		return noisemax
+		
+	@property
 	def callsign(self):
 		for message in reversed(self.messages):
 			if message.callsign:

@@ -102,6 +102,17 @@ class FlightCollectionEntry:
 				if message.altitude < min_h:
 					min_h=message.altitude
 		return min_h
+	
+	@property
+	def abs_distance(self):
+		min_v=100000
+		for message in self.messages:
+			if message.abs_distance:
+				if message.abs_distance < min_v:
+					min_v=message.abs_distance
+					fid = message.hexident
+		return min_v
+		
 		
 	#@property
 	def nearest(self):

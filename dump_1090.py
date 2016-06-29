@@ -83,6 +83,7 @@ def record_positions_to_file(filename):
                kmdistance = distance_between(myLat, myLon, message.latitude, message.longitude) / 1000
                skm = (' dist: %.2f km' % kmdistance).replace(',','.')
                print (skm)
+               snearest=" nearest: "
                if kmdistance < MAX_DISTANCE:
                    # 2014-12-05_07:10:58 flugdaten anzahl:23
                    sDateTime = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
@@ -93,25 +94,24 @@ def record_positions_to_file(filename):
                        sAlt=" alt: " + alt + " m"
                        if minAlt>ialt:
                            minAlt=ialt
-#                   file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + '\n')
-#                   file.flush()
-                   print(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt)
-                   lines += 1          
-                   print("Recorded lines:", lines)
+#                      file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + '\n')
+#                      file.flush()
+		       #get flight with nearest view distance
+                       mynearest=getnearest(collection)
+                       if mynearest:
+                           snearest+= ("%.2f" % mynearest.abs_distance)
+                           if USE_SERIAL:
+                               mynearest._noise=serialdata.get_noiselevel()
+                               ndist, hid = mynearest.nearest()
+                       print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest._noise)
+                   #print("flight: ", flight)
+                   #path = list(flight.path)
+                   print(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
+               lines += 1          
+               print("Recorded lines:", lines)
                print("msg: ",message.to_string())
                
                print("flights: ", len(collection))
-               #get flight with nearest view distance
-               mynearest=getnearest(collection)
-               if mynearest:
-                   if USE_SERIAL:
-                      
-                      mynearest._noise=serialdata.get_noiselevel()
-			 
-                   ndist, hid = mynearest.nearest()
-                   print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest._noise)
-                   #print("flight: ", flight)
-                   #path = list(flight.path)
                end_time = time()
                time_taken = end_time - starttime # time_taken is in seconds
                hours, rest = divmod(time_taken,3600)
@@ -121,7 +121,8 @@ def record_positions_to_file(filename):
                        if USE_FHEM:
                            senddata(mynearest.callsign, ndist, mynearest.noise)
                    starttime=time()
-                   file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + '\n')
+                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
+                   file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')
                    file.flush()
 #                   collection=FlightCollection() #clear
                    minAlt=100000

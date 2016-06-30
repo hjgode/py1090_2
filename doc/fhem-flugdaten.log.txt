@@ -1,0 +1,10 @@
+2016-06-26_17:47:17 flugdaten anzahl: 10 dist: 13.36 km alt: 2712.72 m
+2016-06-27_07:03:06 flugdaten anzahl: 9 dist: 31.48 km alt: 10660.38 m
+2016-06-27_07:04:11 flugdaten anzahl: 8 dist: 28.60 km alt: 10660.38 m
+2016-06-27_07:05:13 flugdaten anzahl: 5 dist: 31.93 km alt: 10668.00 m
+2016-06-27_07:06:16 flugdaten anzahl: 5 dist: 39.92 km alt: 10683.24 m
+2016-06-27_07:07:21 flugdaten anzahl: 8 dist: 28.65 km alt: 10363.20 m
+2016-06-27_07:15:03 flugdaten anzahl: 12 dist: 46.19 km alt: 12184.38 m
+2016-06-27_07:16:05 flugdaten anzahl: 12 dist: 21.06 km alt: 4191.00 m
+2016-06-27_19:13:54 flugdaten anzahl: 8 dist: 31.74 km alt: 11582.40 m
+2016-06-27_19:14:59 flugdaten anzahl: 6 dist: 44.85 km alt: 11582.40 m

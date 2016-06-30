@@ -1,0 +1,16 @@
+# Created by FHEM/98_SVG.pm, 2016-06-24 16:12:20
+set terminal png transparent size <SIZE> crop
+set output '<OUT>.png'
+set xdata time
+set timefmt "%Y-%m-%d_%H:%M:%S"
+set xlabel " "
+set title 'Empfangene Flugzeuge'
+set ytics 
+set y2tics 
+set grid ytics y2tics
+set ylabel "Anzahl Flugzeuge"
+set y2label "Anzahl Flugzeuge"
+
+#FileLog_Flugdaten 4:anzahl:0:
+
+plot "<IN>" using 1:2 axes x1y1 title 'Anzahl Flugzeuge' ls l0 lw 0.5 with lines

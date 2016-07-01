@@ -17,25 +17,28 @@ setstate fluglaerm z
 """
 
 def strformat(value):
-	str = ('%.2f' % value).replace(',','.')
-	return str
-	
+    str = ('%.2f' % value).replace(',','.')
+    return str
+    
 def senddata(flight, viewdistance, noise):
-	print("senddata: ", flight, viewdistance, noise)
-	tn=telnetlib.Telnet("atom2", 7072, 3)
-	#tn.read_until("is '^]'.".encode(),2)
-	#tn.read_all()
-	tn.write("\n".encode())
-	tn.read_until("fhem> ".encode(),2)
-	
-	#send data now
-	data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+";"
-	tn.write(data.encode())	
-	tn.read_until("fhem> ".encode(),2)
-	
-	tn.write("exit\n".encode())
-	print (tn.read_all())
-	tn.close()
-	print("senddata done.")
-	return
-	
+    print("senddata: ", flight, viewdistance, noise)
+    try:
+        tn=telnetlib.Telnet("atom2", 7072, 3)
+        #tn.read_until("is '^]'.".encode(),2)
+        #tn.read_all()
+        tn.write("\n".encode())
+        tn.read_until("fhem> ".encode(),2)
+           
+        #send data now
+        data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+";"
+        tn.write(data.encode())    
+        tn.read_until("fhem> ".encode(),2)
+            
+        tn.write("exit\n".encode())
+        print (tn.read_all())
+        tn.close()
+    except:
+        print("exception in telnet read/write")
+    print("senddata done.")
+    return
+    

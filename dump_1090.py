@@ -67,7 +67,7 @@ def record_positions_to_file(filename):
           serialdata.startreading()
        except:
           print("Serial Init failed")
-	  
+      
     with Connection("atom2", 30003) as connection, open(filename, 'a') as file, open('message.log', 'a') as logmsg:
         lines = 0
         for line in connection:
@@ -96,7 +96,7 @@ def record_positions_to_file(filename):
                            minAlt=ialt
 #                      file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + '\n')
 #                      file.flush()
-		       #get flight with nearest view distance
+               #get flight with nearest view distance
                        mynearest=getnearest(collection)
                        if mynearest:
                            snearest+= ("%.2f" % mynearest.abs_distance)

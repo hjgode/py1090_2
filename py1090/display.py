@@ -22,7 +22,8 @@ display_flight (need hex to identify col starting at 4)
 	maintain flights in internal list/dict/array
 """
 class display:
-	
+
+	#TODO implement a callback that can be called for printing status messages
 	def __init__(self,screen):
 		self.CLEANUP_TIMEOUT=5 #minutes a flight has to be last seen before cleanup
 		self.date="2016-01-01"

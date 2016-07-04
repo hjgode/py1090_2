@@ -125,6 +125,7 @@ def record_positions_to_file(screen, filename):
                if minutes >= UPDATE_INTERVAL: #5:
                    if mynearest:
                        if USE_FHEM:
+                           #TODO add a callback function that we can use to add print output of fhem to curses screen
                            senddata(mynearest.callsign, ndist, mynearest.noise)
                    starttime=time()
 ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)

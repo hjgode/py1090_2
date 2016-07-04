@@ -9,10 +9,10 @@ def main(screen):
 	disp = display(screen)
 	collection=FlightCollection()
 	file=open("./message.log", "r")
-	for i in range (0,50):
+	for i in range (0,500):
 		line=file.readline()
 		disp.add_line(line)
-		time.sleep(0.5)
+		time.sleep(0.1)
 	#print(line)
 	file.close()
 	time.sleep(5)

@@ -80,9 +80,11 @@ class display:
 		#timestamp=datetime.datetime.now()
 		#self.update_timestamp(timestamp)
 		
+		#show num of msg processed
 		col=self.left_offs+21
 		self.term.addstr(row,col, "{0:>6}".format(self.msg_cnt))
 		
+		#show current num of flights
 		col=self.left_offs+34
 		self.term.addstr(row,col,"{:02d}".format(len(self.collection)))
 		
@@ -93,9 +95,11 @@ class display:
 		timestamp=msg.generation_time
 		self.update_timestamp(timestamp)
 		
+		#show num of msg processed
 		self.msg_cnt+=1
 		self.term.addstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
 		
+		#cleanup collection for disapeared flights
 		if msg.record_time:
 			self.cleanup(self.collection, msg.record_time)
 		
@@ -106,6 +110,7 @@ class display:
 		self.term.refresh()
 		
 	def print_coll(self):
+		#print flights line by line
 		row=5
 		col=self.left_offs
 		for flight in self.collection:
@@ -113,6 +118,7 @@ class display:
 			row+=1
 
 	def print_flight(self,flight,row):
+		#print flight details line
 		col=self.left_offs
 		self.term.addstr(row,col,"{0:>8}".format(flight.hexident))
 		

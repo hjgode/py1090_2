@@ -27,6 +27,8 @@ class display:
 		self.CLEANUP_TIMEOUT=5 #minutes a flight has to be last seen before cleanup
 		self.date="2016-01-01"
 		self.time="00:00:00"
+		self.nearest=None #store nearest flight
+		self.nearest_row=0
 		self.left_offs=0
 		self.msg_cnt=0
 		self.num_flights=0
@@ -112,10 +114,16 @@ class display:
 	def print_coll(self):
 		#print flights line by line
 		row=5
+		self.nearest=None
+		self.nearest_row=0
 		col=self.left_offs
 		for flight in self.collection:
 			self.print_flight(flight,row)
 			row+=1
+		#make nearest flight line bold
+		if self.nearest_row!=0:
+			self.term.chgat(self.nearest_row, self.left_offs, curses.A_BOLD)
+			
 
 	def print_flight(self,flight,row):
 		#print flight details line
@@ -138,10 +146,17 @@ class display:
 			col=self.left_offs+36
 			self.term.addstr(row,col,"{0:02.1f}".format(lastdist))
 		
+		#view distance
 		lastview=flight.abs_distance
 		if lastview!=None and lastview!=100000:
 			col=self.left_offs+42
 			self.term.addstr(row,col,"{0:02.1f}".format(lastview))
+			if self.nearest==None:
+				self.nearest_row=row
+				self.nearest=lastview
+			elif self.nearest>lastview:
+				self.nearest=lastview
+				self.nearest_row=row
 		
 		lastalt=flight.last_altitude
 		if lastalt!=None:
@@ -152,6 +167,8 @@ class display:
 		if lastseen!=None:
 			col=self.left_offs+55
 			self.term.addstr(row,col,lastseen.strftime('%H:%M:%S'))
-			
+		
+		self.term.clrtobot()
+
 		self.term.clrtobot()
 		

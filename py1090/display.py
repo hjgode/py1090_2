@@ -114,18 +114,21 @@ class display:
 	def print_coll(self):
 		#print flights line by line
 		row=5
-		self.nearest=None
+		self.nearest=100000
 		self.nearest_row=0
 		col=self.left_offs
 		for flight in self.collection:
+#			self.term.chgat(col, row, curses.A_NORMAL)
 			self.print_flight(flight,row)
 			row+=1
+		curses.doupdate()
 		#make nearest flight line bold
 		if self.nearest_row!=0:
 			self.term.chgat(self.nearest_row, self.left_offs, curses.A_BOLD)
 			
 
 	def print_flight(self,flight,row):
+		self.term.attron(curses.A_NORMAL)
 		#print flight details line
 		col=self.left_offs
 		self.term.addstr(row,col,"{0:>8}".format(flight.hexident))
@@ -151,17 +154,16 @@ class display:
 		if lastview!=None and lastview!=100000:
 			col=self.left_offs+42
 			self.term.addstr(row,col,"{0:02.1f}".format(lastview))
-			if self.nearest==None:
-				self.nearest_row=row
-				self.nearest=lastview
-			elif self.nearest>lastview:
+			if lastview < self.nearest:
 				self.nearest=lastview
 				self.nearest_row=row
 		
 		lastalt=flight.last_altitude
 		if lastalt!=None:
 			col=self.left_offs+50
-			self.term.addstr(row,col,"{0:02.1f}".format(lastalt*0.3048 / 1000)) #feets and km
+			# :0 leading zero
+			# :>04.1f leading zero, 4 places over all, including the dot and one digit after dot, right aligned
+			self.term.addstr(row,col,"{0:>04.1f}".format(lastalt*0.3048 / 1000)) #feets and km
 			
 		lastseen=flight.last_seen
 		if lastseen!=None:

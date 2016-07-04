@@ -23,7 +23,7 @@ class SerialData:
         try:
             self.serial=serial.Serial(p, 115200, timeout=None)
         except:
-            print("### Serialport Exception")
+#            print("### Serialport Exception")
             self.serial=None
             
 

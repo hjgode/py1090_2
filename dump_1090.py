@@ -68,7 +68,8 @@ def record_positions_to_file(filename):
        except:
           print("Serial Init failed")
       
-    with Connection("atom2", 30003) as connection, open(filename, 'a') as file, open('message.log', 'a') as logmsg:
+    with Connection("atom2", 30003) as connection, open('message.log', 'a') as logmsg:
+        file = open(filename, 'a')
         lines = 0
         for line in connection:
             logmsg.write(line)
@@ -126,6 +127,12 @@ def record_positions_to_file(filename):
                    file.flush()
 #                   collection=FlightCollection() #clear
                    minAlt=100000
+                   # check for month roll-over and use new file
+                   if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":
+                       file.flush()
+                       file.close()
+                       filename = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
+                       file=open(filename, 'a')
 if __name__ == "__main__":
     sfile = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
     record_positions_to_file(sfile)

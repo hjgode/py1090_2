@@ -1,6 +1,7 @@
 from collections import namedtuple, defaultdict
 from .message import Message
 from datetime import datetime
+from .helpers import *
 
 class FlightCollection:
     """A collection of :py:class:`FlightCollectionEntry`'s, stored by hexident.
@@ -167,6 +168,15 @@ class FlightCollectionEntry:
             if message.latitude and message.longitude:
                 return (message.latitude, message.longitude)
         return None, None
+
+    @property
+    def last_distance(self):
+        myLat = 51.0991
+        myLon = 6.5095
+        for message in reversed(self.messages):
+            if message.latitude and message.longitude:
+                return distance_between(myLat, myLon, message.latitude, message.longitude) / 1000
+        return None
 
     @property
     def last_altitude(self):

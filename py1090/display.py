@@ -112,6 +112,16 @@ class display:
 		self.print_coll()
 		self.term.refresh()
 		
+	def set_coll(self,coll, timestamp):
+		self.collection=coll
+		self.update_timestamp(timestamp)
+		#show num of msg processed
+		self.msg_cnt+=1
+		self.term.addstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
+		self.update_head()
+		self.print_coll()
+		self.term.refresh()
+		
 	def print_coll(self):
 		#print flights line by line
 		row=5

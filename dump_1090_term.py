@@ -82,10 +82,12 @@ def record_positions_to_file(screen, filename):
 ##            print("trans type: ", message.transmission_type, message.aircraft_id, message.flight_id, message.callsign)
             collection.add(message)
 			
-            disp.add_line(line)
+##            disp.add_line(line) '  use single msg add
             
             if message.record_time:
                 cleanup(collection, message.record_time)
+            
+            disp.set_coll(collection,message.record_time)
 
             if message.latitude and message.longitude:# and message.altitude:
                kmdistance = distance_between(myLat, myLon, message.latitude, message.longitude) / 1000

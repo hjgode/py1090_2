@@ -30,12 +30,14 @@ class display:
 		self.time="00:00:00"
 		self.nearest=None #store nearest flight
 		self.nearest_row=0
-		self.left_offs=0
+		self.left_offs=1
 		self.msg_cnt=0
 		self.num_flights=0
 		self.collection=FlightCollection()
 		self.term=screen
 		#self.term.clear()
+		self.height,self.width = self.term.getmaxyx()
+		
 		self.write_head()
 
 	def cleanup(self, _flightcollection, _record_time):
@@ -137,8 +139,28 @@ class display:
 		if self.nearest_row!=0:
 			self.term.chgat(self.nearest_row, self.left_offs, curses.A_BOLD)
 			
+	def print_msg(self,txt):
+		"""
+		self.term.addstr(5,1,"size: {0} / {1}".format(self.height, self.width))
+		self.term.addstr(6,1,txt)
+		self.term.refresh()
+		"""
+		row=self.height-2
+		col=self.left_offs
+		#self.term.addstr(7,1,"addstr row,col: {0} / {1}".format(row, col))
+		#self.term.getch()
+		self.term.addstr(row, col, txt)
 
+	def cleartobot(self,current_row):
+		blanks=" " * (self.width - self.left_offs)
+		for i in range(current_row+1, self.height-2):
+			curses.setsyx(i, self.left_offs)
+			self.term.clrtoeol()
+			self.term.addstr(i,1,blanks)
+			
 	def print_flight(self,flight,row):
+		if row>=self.height-2:
+			return
 		self.term.attron(curses.A_NORMAL)
 		#print flight details line
 		col=self.left_offs
@@ -181,7 +203,6 @@ class display:
 			col=self.left_offs+55
 			self.term.addstr(row,col,lastseen.strftime('%H:%M:%S'))
 		
-		self.term.clrtobot()
-
-		self.term.clrtobot()
+		self.cleartobot(row)
+#		self.term.clrtobot()
 		

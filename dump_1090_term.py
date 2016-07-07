@@ -18,7 +18,7 @@ SERIAL_PORT="/dev/pts/3"
 USE_FHEM=True #use telnet to update noise data within fhem
 MAX_DISTANCE=100 #km distance to record
 UPDATE_INTERVAL=5 #minutes to update log file
-CLEANUP_TIMEOUT=5 #minutes a flight has to be last seen before cleanup
+CLEANUP_TIMEOUT=1 #minutes a flight has to be last seen before cleanup
 #local position
 myLat = 51.0991
 myLon = 6.5095
@@ -88,6 +88,7 @@ def record_positions_to_file(screen, filename):
                 cleanup(collection, message.record_time)
             
             disp.set_coll(collection,message.record_time)
+            disp.print_msg(line)
 
             if message.latitude and message.longitude:# and message.altitude:
                kmdistance = distance_between(myLat, myLon, message.latitude, message.longitude) / 1000

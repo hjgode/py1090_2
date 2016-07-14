@@ -2,7 +2,6 @@ from enum import Enum
 from datetime import datetime
 from .helpers import *
 import math
-from .serial_data import *
 
 #lat and long of local position
 myLat = 51.0991
@@ -151,7 +150,10 @@ class Message:
     @property
     def _noise(self,value):
         self.noise=value
-        
+
+    def set_noise(self,value):
+        self.noise=value
+		    
     def __init__(self):
 
         self.message_type = None

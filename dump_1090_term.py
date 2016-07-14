@@ -10,10 +10,13 @@ from curses import wrapper
 #import helpers 
 import datetime
 from time import time
+from py1090.json_getnoise import *
+
 # needs python3, python2.x will not work
 
-USE_SERIAL=True #False #use serial port to read noise data
-SERIAL_PORT="/dev/pts/3"
+USE_SERIAL=False
+USE_NOISE=True #use serial port to read noise data
+#SERIAL_PORT="/dev/pts/3"
         
 USE_FHEM=True #use telnet to update noise data within fhem
 MAX_DISTANCE=100 #km distance to record
@@ -61,7 +64,8 @@ def getnearest(_flightcollection):
 def record_positions_to_file(screen, filename):
 
     disp = display(screen)
-    
+    if USE_NOISE:
+        mynoise = json_noise()
     collection = FlightCollection()
     starttime = time()
     minAlt = 100000
@@ -86,7 +90,11 @@ def record_positions_to_file(screen, filename):
             
             if message.record_time:
                 cleanup(collection, message.record_time)
-            
+			#add noise measure to message data
+            if USE_NOISE:
+                n=mynoise.get_noise()
+                message.set_noise(n)
+				    
             disp.set_coll(collection,message.record_time)
             disp.print_msg(line)
 
@@ -109,9 +117,9 @@ def record_positions_to_file(screen, filename):
                        mynearest=getnearest(collection)
                        if mynearest:
                            snearest+= ("%.2f" % mynearest.abs_distance)
-                           if USE_SERIAL:
-                               mynearest._noise=serialdata.get_noiselevel()
-                               ndist, hid = mynearest.nearest()
+                           #if USE_NOISE:
+                           #    mynearest._noise=getdata()
+                           ndist, hid = mynearest.nearest()
 ##                       print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest._noise)
                    #print("flight: ", flight)
                    #path = list(flight.path)

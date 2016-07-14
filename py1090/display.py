@@ -66,7 +66,7 @@ class display:
 		row+=1
 		self.term.addstr(row,col,"------------------------------------------------------------------------------")
 		row+=1
-		self.term.addstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |")
+		self.term.addstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |noise |")
 		row+=1
 		self.term.addstr(row,col,"------------------------------------------------------------------------------")
 		self.term.refresh()
@@ -200,9 +200,14 @@ class display:
 			
 		lastseen=flight.last_seen
 		if lastseen!=None:
-			col=self.left_offs+55
+			col=self.left_offs+56
 			self.term.addstr(row,col,lastseen.strftime('%H:%M:%S'))
 		
+		noise=flight.noise
+		if noise!=None:
+			col=self.left_offs+67
+			self.term.addstr(row,col,"{0:>4}".format(noise))
+
 		self.cleartobot(row)
 #		self.term.clrtobot()
 		

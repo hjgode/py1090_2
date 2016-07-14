@@ -20,8 +20,8 @@ def strformat(value):
     str = ('%.2f' % value).replace(',','.')
     return str
     
-def senddata(flight, viewdistance, noise):
-    print("senddata: ", flight, viewdistance, noise)
+def senddata(flight, viewdistance, noise, callback):
+    callback("senddata: {0} {1} {2}".format(flight, viewdistance, noise))
     try:
         tn=telnetlib.Telnet("atom2", 7072, 3)
         #tn.read_until("is '^]'.".encode(),2)
@@ -35,10 +35,10 @@ def senddata(flight, viewdistance, noise):
         tn.read_until("fhem> ".encode(),2)
             
         tn.write("exit\n".encode())
-        print (tn.read_all())
+        callback (tn.read_all())
         tn.close()
     except:
-        print("exception in telnet read/write")
-    print("senddata done.")
+        callback("exception in telnet read/write")
+    callback("senddata done.")
     return
     

@@ -56,19 +56,39 @@ class display:
 			_flightcollection.remove(i)
 		return
 		
+	def myaddstr(self, r,c,txt):
+		w=0
+		h=0
+		if curses.is_term_resized(h, w):
+		#	self.height, self.width= self.term.getmaxyx()
+		#	self.term.clear()
+			curses.resizeterm(self.height, self.width)
+			self.write_head()
+			self.term.refresh()
+		#slice first part until screen width is reached
+		# if len(str)>self.width-c 
+		if len(txt)>self.width-c:
+			t=txt[:self.width-c]
+		else:
+			t=txt
+		try:
+			self.term.addstr(r,c,t)
+		except:
+			return
+			
 	def write_head(self):
 		#clear top line
 		row=1
 		col=self.left_offs
 		#                         0          1         2          3          4         5         6         7            
 		#                         date      |time    |msgcount|num flights|
-		self.term.addstr(row,col,"          |        |        |           |                                     ")
+		self.myaddstr(row,col,"          |        |        |           |                                     ")
 		row+=1
-		self.term.addstr(row,col,"------------------------------------------------------------------------------")
+		self.myaddstr(row,col,"-------------------------------------------------------------------------")
 		row+=1
-		self.term.addstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |noise |")
+		self.myaddstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |noise |")
 		row+=1
-		self.term.addstr(row,col,"------------------------------------------------------------------------------")
+		self.myaddstr(row,col,"-------------------------------------------------------------------------")
 		self.term.refresh()
 
 	def update_timestamp(self,timestamp):
@@ -76,9 +96,9 @@ class display:
 		sDate=timestamp.strftime('%Y-%m-%d')
 		sTime=timestamp.strftime('%H:%M:%S')
 		col=self.left_offs+0
-		self.term.addstr(row,col,sDate)
+		self.myaddstr(row,col,sDate)
 		col=self.left_offs+11
-		self.term.addstr(row,col,sTime)
+		self.myaddstr(row,col,sTime)
 
 	def update_head(self):
 		row=1
@@ -87,11 +107,11 @@ class display:
 		
 		#show num of msg processed
 		col=self.left_offs+21
-		self.term.addstr(row,col, "{0:>6}".format(self.msg_cnt))
+		self.myaddstr(row,col, "{0:>6}".format(self.msg_cnt))
 		
 		#show current num of flights
 		col=self.left_offs+34
-		self.term.addstr(row,col,"{:02d}".format(len(self.collection)))
+		self.myaddstr(row,col,"{:02d}".format(len(self.collection)))
 		
 		self.term.refresh()
 		
@@ -102,7 +122,7 @@ class display:
 		
 		#show num of msg processed
 		self.msg_cnt+=1
-		self.term.addstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
+		self.myaddstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
 		
 		#cleanup collection for disapeared flights
 		if msg.record_time:
@@ -119,7 +139,7 @@ class display:
 		self.update_timestamp(timestamp)
 		#show num of msg processed
 		self.msg_cnt+=1
-		self.term.addstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
+		self.myaddstr(1,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
 		self.update_head()
 		self.print_coll()
 		self.term.refresh()
@@ -149,14 +169,14 @@ class display:
 		col=self.left_offs
 		#self.term.addstr(7,1,"addstr row,col: {0} / {1}".format(row, col))
 		#self.term.getch()
-		self.term.addstr(row, col, txt)
+		self.myaddstr(row, col, txt)
 
 	def cleartobot(self,current_row):
 		blanks=" " * (self.width - self.left_offs)
 		for i in range(current_row+1, self.height-2):
 			curses.setsyx(i, self.left_offs)
 			self.term.clrtoeol()
-			self.term.addstr(i,1,blanks)
+			self.myaddstr(i,1,blanks)
 			
 	def print_flight(self,flight,row):
 		if row>=self.height-2:
@@ -164,29 +184,29 @@ class display:
 		self.term.attron(curses.A_NORMAL)
 		#print flight details line
 		col=self.left_offs
-		self.term.addstr(row,col,"{0:>8}".format(flight.hexident))
+		self.myaddstr(row,col,"{0:>8}".format(flight.hexident))
 		
 		col=self.left_offs+11
-		self.term.addstr(row,col,flight.callsign);
+		self.myaddstr(row,col,flight.callsign);
 		
 		(lat,lon)=flight.last_position
 		if lat != None:
 			col=self.left_offs+22
-			self.term.addstr(row,col,"{0:02.3f}".format(lat))
+			self.myaddstr(row,col,"{0:02.3f}".format(lat))
 		if lon != None:
 			col=self.left_offs+30
-			self.term.addstr(row,col,"{0:02.3f}".format(lon))
+			self.myaddstr(row,col,"{0:02.3f}".format(lon))
 			
 		lastdist=flight.last_distance
 		if lastdist!=None:
 			col=self.left_offs+36
-			self.term.addstr(row,col,"{0:02.1f}".format(lastdist))
+			self.myaddstr(row,col,"{0:02.1f}".format(lastdist))
 		
 		#view distance
 		lastview=flight.abs_distance
 		if lastview!=None and lastview!=100000:
 			col=self.left_offs+42
-			self.term.addstr(row,col,"{0:02.1f}".format(lastview))
+			self.myaddstr(row,col,"{0:02.1f}".format(lastview))
 			if lastview < self.nearest:
 				self.nearest=lastview
 				self.nearest_row=row
@@ -196,17 +216,17 @@ class display:
 			col=self.left_offs+50
 			# :0 leading zero
 			# :>04.1f leading zero, 4 places over all, including the dot and one digit after dot, right aligned
-			self.term.addstr(row,col,"{0:>04.1f}".format(lastalt*0.3048 / 1000)) #feets and km
+			self.myaddstr(row,col,"{0:>04.1f}".format(lastalt*0.3048 / 1000)) #feets and km
 			
 		lastseen=flight.last_seen
 		if lastseen!=None:
 			col=self.left_offs+56
-			self.term.addstr(row,col,lastseen.strftime('%H:%M:%S'))
+			self.myaddstr(row,col,lastseen.strftime('%H:%M:%S'))
 		
 		noise=flight.noise
 		if noise!=None:
 			col=self.left_offs+67
-			self.term.addstr(row,col,"{0:>4}".format(noise))
+			self.myaddstr(row,col,"{0:>4}".format(noise))
 
 		self.cleartobot(row)
 #		self.term.clrtobot()

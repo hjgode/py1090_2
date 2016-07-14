@@ -19,8 +19,10 @@ USE_NOISE=True #use serial port to read noise data
 #SERIAL_PORT="/dev/pts/3"
         
 USE_FHEM=True #use telnet to update noise data within fhem
-MAX_DISTANCE=100 #km distance to record
-UPDATE_INTERVAL=5 #minutes to update log file
+MAX_DISTANCE=35 #km distance to record
+#TODO: add code to record only flights below this max altitude
+MAX_ALTITUDE=8  #max altitude of flights to record
+UPDATE_INTERVAL=1 #5 #minutes to update log file
 CLEANUP_TIMEOUT=1 #minutes a flight has to be last seen before cleanup
 #local position
 myLat = 51.0991
@@ -65,7 +67,7 @@ def record_positions_to_file(screen, filename):
 
     disp = display(screen)
     if USE_NOISE:
-        mynoise = json_noise()
+        mynoise = json_noise(disp.print_msg)
     collection = FlightCollection()
     starttime = time()
     minAlt = 100000
@@ -112,7 +114,7 @@ def record_positions_to_file(screen, filename):
                        alt = ('%.2f' % (message.altitude*0.3048)).replace(',','.')
                        sAlt=" alt: " + alt + " m"
                        if minAlt>ialt:
-                           minAlt=ialt
+                           minAlt=ialt #save lowest altitude
                        #get flight with nearest view distance
                        mynearest=getnearest(collection)
                        if mynearest:
@@ -137,7 +139,7 @@ def record_positions_to_file(screen, filename):
                    if mynearest:
                        if USE_FHEM:
                            #TODO add a callback function that we can use to add print output of fhem to curses screen
-                           senddata(mynearest.callsign, ndist, mynearest.noise)
+                           senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg)
                    starttime=time()
 ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
                    file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')

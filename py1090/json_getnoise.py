@@ -7,12 +7,16 @@ from urllib.request import urlopen
 nodemcu='http://192.168.0.70/json'
 
 class json_noise:
-	def __init__(self):
+	def __init__(self, callback):
 		self.is_alive=True
 		self._noise=0
 		self.thread=None
 		self.startreading()
+		self._callback=callback
 	
+	def print_msg(self,txt):
+		self._callback(txt);
+		
 	def get_noise(self):
 		return self._noise
 		
@@ -23,14 +27,15 @@ class json_noise:
 			while self.is_alive:
 				with urlopen(nodemcu) as r:
 					result = json.loads(r.read().decode(r.headers.get_content_charset('utf-8')))
-				#print(result, "\n=================")
-				noise=result['Sensors'][0]["Analog"]
-				#print ("noise: ", noise)
-		#		print ("noise int: ", int(noise*1024/1000*3/10))
-				n=int(noise*1024/1000*3/10)
-				self._noise=n
+					#print(result, "\n=================")
+					noise=result['Sensors'][0]["Analog"]
+					#print ("noise: ", noise)
+			#		print ("noise int: ", int(noise*1024/1000*3/10))
+					n=int(noise*1024/1000*3/10)
+					self._noise=n
+					self.print_msg("noise; {0}".format(n))
 		except:
-			print("exception json read")
+			self.print_msg("exception json read")
 	#	print("getdata done.")
 		return;
 

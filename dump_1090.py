@@ -10,7 +10,7 @@ import datetime
 from time import time
 # needs python3, python2.x will not work
 
-USE_SERIAL=True #False #use serial port to read noise data
+USE_SERIAL=False #True #False #use serial port to read noise data
 SERIAL_PORT="/dev/pts/3"
         
 USE_FHEM=True #use telnet to update noise data within fhem
@@ -102,9 +102,9 @@ def record_positions_to_file(filename):
                        if mynearest:
                            snearest+= ("%.2f" % mynearest.abs_distance)
                            if USE_SERIAL:
-                               mynearest._noise=serialdata.get_noiselevel()
-                               ndist, hid = mynearest.nearest()
-                       print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest._noise)
+                               mynearest.noise=serialdata.get_noiselevel()
+                           ndist, hid = mynearest.nearest()
+                           print("nearest: ", mynearest.hexident, mynearest.callsign, ndist, mynearest.noise)
                    #print("flight: ", flight)
                    #path = list(flight.path)
                    print(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)

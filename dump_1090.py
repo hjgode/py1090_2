@@ -14,8 +14,10 @@ USE_SERIAL=False #True #False #use serial port to read noise data
 SERIAL_PORT="/dev/pts/3"
         
 USE_FHEM=True #use telnet to update noise data within fhem
-MAX_DISTANCE=100 #km distance to record
-UPDATE_INTERVAL=5 #minutes to update log file
+
+MAX_DISTANCE=30 #km distance to record
+MAX_ALTITUDE=5
+UPDATE_INTERVAL=1 #minutes to update log file
 CLEANUP_TIMEOUT=5 #minutes a flight has to be last seen before cleanup
 #local position
 myLat = 51.0991

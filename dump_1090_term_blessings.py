@@ -25,10 +25,11 @@ USE_NOISE=True #use serial port to read noise data
 #SERIAL_PORT="/dev/pts/3"
         
 USE_FHEM=True #use telnet to update noise data within fhem
-MAX_DISTANCE=35 #km distance to record
-#TODO: add code to record only flights below this max altitude
-MAX_ALTITUDE=8  #max altitude of flights to record
-UPDATE_INTERVAL=1 #5 #minutes to update log file
+
+MAX_DISTANCE=30 #km distance to log
+MAX_ALTITUDE=5000  # m altitude to log
+UPDATE_INTERVAL=1 #minutes to update log file
+
 CLEANUP_TIMEOUT=1 #minutes a flight has to be last seen before cleanup
 #local position
 myLat = 51.0991
@@ -49,6 +50,34 @@ def cleanup(_flightcollection, _record_time):
     for i in toremove:
         _flightcollection.remove(i)
 
+    return
+
+def filtercollection(_flightcollection, disp):
+    """find flights which last_seen older than 5 minutes and clean this
+    returns Nothing
+    """
+    toremove=[]
+    for f in _flightcollection:
+        lastDist=f.last_distance;
+        if lastDist:
+           if lastDist>MAX_DISTANCE:
+               toremove.append(f.hexident)
+    for i in toremove:
+        _flightcollection.remove(i)
+        disp.print_msg("DIST removed "+i+ "     ")
+
+#    return;
+	
+    toremove=[]
+    for f in _flightcollection:
+        lastAltitude=f.last_altitude;
+        if lastAltitude!=None:
+            if lastAltitude*0.3048 > MAX_ALTITUDE: #alt is in feet, MAX_ALTITUDE is in m
+               toremove.append(f.hexident)
+    for i in toremove:
+        _flightcollection.remove(i)
+        disp.print_msg("ALT removed "+i+ "     ")
+        
     return
 
 #return flightcollectionentry with nearest view distance
@@ -101,6 +130,7 @@ def record_positions_to_file(screen, filename):
             
             if message.record_time:
                 cleanup(collection, message.record_time)
+            filtercollection(collection, disp)
 			#add noise measure to message data
             if USE_NOISE:
                 n=mynoise.get_noise()
@@ -114,6 +144,7 @@ def record_positions_to_file(screen, filename):
                skm = (' dist: %.2f km' % kmdistance).replace(',','.')
 ##               print (skm)
                snearest=" nearest: "
+               sDateTime = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
                if kmdistance < MAX_DISTANCE:
                    # 2014-12-05_07:10:58 flugdaten anzahl:23
                    sDateTime = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')

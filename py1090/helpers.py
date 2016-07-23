@@ -15,6 +15,26 @@ def distance_between(lat1, lon1, lat2, lon2):
     r"""Calculates the distance between two locations, in meters, using the `Haversine <http://en.wikipedia.org/wiki/Haversine_formula>`_
     formula.
 
+    Args:
+        lat1 (float): :math:`\phi_1`, the latitude of the reference location
+        lon1 (float): :math:`\lambda_1`, the longitude of the reference location
+        lat2 (float): :math:`\phi_2`, the latitude of the target location
+        lon2 (float): :math:`\lambda_2`, the longitude of the target location
+
+    Returns:
+        float: the distance in meters.
+
+    """
+    deglen=110.25 # km distance of two latitudes at equator
+    x = lat1 - lat2
+    y = (lon1-lon2)*math.cos(lat2)
+    distance = deglen * math.sqrt(x*x + y*y)
+    return distance*1000
+
+def distance_between0(lat1, lon1, lat2, lon2):
+    r"""Calculates the distance between two locations, in meters, using the `Haversine <http://en.wikipedia.org/wiki/Haversine_formula>`_
+    formula.
+
     The bearing between latitude, longitude: :math:`(\phi_1, \lambda_1)` and :math:`(\phi_2, \lambda_2)` is given by
 
     .. math::

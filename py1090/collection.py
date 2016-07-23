@@ -95,7 +95,7 @@ class FlightCollectionEntry:
 
     @property
     def lowest(self):
-        """return flight number with nearest location and hight
+        """return flight with nearest location and hight
         """
         min_h=100000
         for message in self.messages:

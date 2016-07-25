@@ -1,5 +1,6 @@
 #modul fhem.py
 import telnetlib
+import threading
 
 """
 setreading     <devspec> <reading> <value>                       
@@ -20,7 +21,7 @@ def strformat(value):
     str = ('%.2f' % value).replace(',','.')
     return str
     
-def senddata(flight, viewdistance, noise, callback):
+def senddata0(flight, viewdistance, noise, callback, ground_speed):
     callback("senddata: {0} {1} {2}".format(flight, viewdistance, noise))
     try:
         tn=telnetlib.Telnet("atom2", 7072, 3)
@@ -30,7 +31,7 @@ def senddata(flight, viewdistance, noise, callback):
         tn.read_until("fhem> ".encode(),2)
            
         #send data now
-        data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+";"
+        data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+";"+"; setreading fluglaerm ground_speed "+strformat(ground_speed)+";"
         tn.write(data.encode())    
         tn.read_until("fhem> ".encode(),2)
             
@@ -42,3 +43,8 @@ def senddata(flight, viewdistance, noise, callback):
     callback("senddata done.")
     return
     
+def senddata(flight, viewdistance, noise, callback, ground_speed):
+    callback("senddata: {0} {1} {2}".format(flight, viewdistance, noise))
+    thread = threading.Thread(target=senddata0, args=(flight, viewdistance, noise, callback, ground_speed))
+    thread.daemon=True # let's terminat with CTRL+C in main
+    thread.start()

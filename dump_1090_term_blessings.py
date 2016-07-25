@@ -4,8 +4,8 @@ from py1090.collection import *
 from py1090.helpers import *
 from py1090.fhem import *
 
-#using curses or blessings
-USE_BLESSING=True
+from py1090.config import *
+
 if USE_BLESSING:
     from py1090.display_blessing import *
 else:
@@ -20,20 +20,6 @@ from py1090.json_getnoise import *
 
 # needs python3, python2.x will not work
 
-USE_SERIAL=False
-USE_NOISE=True #use serial port to read noise data
-#SERIAL_PORT="/dev/pts/3"
-        
-USE_FHEM=True #use telnet to update noise data within fhem
-
-MAX_DISTANCE=30 #km distance to log
-MAX_ALTITUDE=5000  # m altitude to log
-UPDATE_INTERVAL=1 #minutes to update log file
-
-CLEANUP_TIMEOUT=1 #minutes a flight has to be last seen before cleanup
-#local position
-myLat = 51.0991
-myLon = 6.5095
 
 def cleanup(_flightcollection, _record_time):
     """find flights which last_seen older than 5 minutes and clean this
@@ -53,13 +39,15 @@ def cleanup(_flightcollection, _record_time):
     return
 
 def filtercollection(_flightcollection, disp):
+    if not USE_FILTER:
+        return
     """find flights which last_seen older than 5 minutes and clean this
     returns Nothing
     """
     toremove=[]
     for f in _flightcollection:
         lastDist=f.last_distance;
-        if lastDist:
+        if lastDist!=None:
            if lastDist>MAX_DISTANCE:
                toremove.append(f.hexident)
     for i in toremove:
@@ -85,10 +73,6 @@ def getnearest(_flightcollection):
     mynearest=None
     distmax=100000
     for flight in _flightcollection:
-#                  if flight.hexident in blacklist_hexidents:
-#                      continue
-#                   print("flight: ", flight.last_altitude, flight.last_position, flight.last_seen)
-#                   print("lowest: ", flight.lowest)
         #nearest returns entry with lowest view distance
         ndist, hid = flight.nearest()
         if ndist < distmax and hid:
@@ -178,13 +162,11 @@ def record_positions_to_file(screen, filename):
                if minutes >= UPDATE_INTERVAL: #5:
                    if mynearest:
                        if USE_FHEM:
-                           #TODO add a callback function that we can use to add print output of fhem to curses screen
-                           senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg)
+                           senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg, mynearest.min_ground_speed)
                    starttime=time()
 ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
                    file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')
                    file.flush()
-#                   collection=FlightCollection() #clear
                    minAlt=100000
                    # check for month roll-over and use new file
                    if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":
@@ -192,6 +174,7 @@ def record_positions_to_file(screen, filename):
                        file.close()
                        filename = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
                        file=open(filename, 'a')
+
 def main(screen):
     sfile = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
     record_positions_to_file(screen, sfile)

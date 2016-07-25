@@ -12,7 +12,8 @@ The values are taken from the WGS 84 (World Geodetic System 1984) ellipsoid
 """
 
 def distance_between(lat1, lon1, lat2, lon2):
-    r"""Calculates the distance between two locations, in meters, using the `Haversine <http://en.wikipedia.org/wiki/Haversine_formula>`_
+    r"""Calculates the distance between two locations, in meters, using the 
+	http://jonisalonen.com/2014/computing-distance-between-coordinates-can-be-simple-and-fast/
     formula.
 
     Args:

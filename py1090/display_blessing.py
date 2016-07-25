@@ -39,11 +39,18 @@ class display:
 		self.term=Terminal()
 		self.term.fullscreen()
 		self.term.clear()
-		self.height=self.term.height
-		self.width = self.term.width
+#		self.height=self.term.height
+#		self.width = self.term.width
 		self.cleartobot(0)
 		self.write_head()
 
+	@property
+	def height(self):
+		return self.term.height
+	@property
+	def width (self):
+		return self.term.width
+			
 	def cleanup(self, _flightcollection, _record_time):
 		"""find flights which last_seen older than 5 minutes and clean this
 		returns Nothing
@@ -91,11 +98,11 @@ class display:
 		#                         date      |time    |msgcount|num flights|
 		self.myaddstr(row,col,"          |        |        |           |                                     ")
 		row+=1
-		self.myaddstr(row,col,"-------------------------------------------------------------------------")
+		self.myaddstr(row,col,"---------------------------------------------------------------------------------")
 		row+=1
-		self.myaddstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |noise |")
+		self.myaddstr(row,col,"ICOA      |call sign |lat   |lon   |dist |view |alt   |last seen |noise |g_speed|")
 		row+=1
-		self.myaddstr(row,col,"-------------------------------------------------------------------------")
+		self.myaddstr(row,col,"---------------------------------------------------------------------------------")
 #		self.term.refresh()
 
 	def update_timestamp(self,timestamp):
@@ -152,7 +159,10 @@ class display:
 		self.msg_cnt+=1
 		self.myaddstr(self.top_offs,self.left_offs+21, "{0:>6}".format(self.msg_cnt))
 		
+		self.write_head()
 		self.update_head()
+		self.update_timestamp(timestamp)
+		
 		self.print_coll()
 		self.update_timestamp(timestamp)
 #		self.term.refresh()
@@ -195,7 +205,7 @@ class display:
 #		self.term.move(current_row+1,self.left_offs) 
 #		self.term.clear_eos()
 
-		for i in range(current_row+1, self.height-2):
+		for i in range(current_row, self.height-2):
 #			print (self.term.moveto(i,self.left_offs) + "                                                          "
 #			curses.setsyx(i, self.left_offs)
 #			self.term.clrtoeol()
@@ -255,6 +265,11 @@ class display:
 		if noise!=None:
 			col=self.left_offs+67
 			self.myaddstr(row,col,"{0:>4}".format(noise))
+
+		groundspeed=flight.min_ground_speed
+		if groundspeed!=None:
+			col=self.left_offs+75
+			self.myaddstr(row,col,"{0:>4.0f}".format(groundspeed))
 
 #		self.term.clrtobot()
 		

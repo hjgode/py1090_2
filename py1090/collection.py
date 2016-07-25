@@ -2,6 +2,7 @@ from collections import namedtuple, defaultdict
 from .message import Message
 from datetime import datetime
 from .helpers import *
+from .config import *
 
 class FlightCollection:
     """A collection of :py:class:`FlightCollectionEntry`'s, stored by hexident.
@@ -137,6 +138,16 @@ class FlightCollectionEntry:
         return noisemax
         
     @property
+    def min_ground_speed(self):
+        speedmin=1000000
+        for message in self.messages:
+            if message.ground_speed and message.ground_speed < speedmin:
+                speedmin=message.ground_speed
+        if speedmin==1000000:
+            speedmin=0
+        return speedmin
+        
+    @property
     def callsign(self):
         for message in reversed(self.messages):
             if message.callsign:
@@ -170,9 +181,9 @@ class FlightCollectionEntry:
         return None, None
 
     @property
-    def last_distance(self):
-        myLat = 51.0991
-        myLon = 6.5095
+    def last_distance(self): # return distance in km
+#        myLat = 51.0991
+#        myLon = 6.5095
         for message in reversed(self.messages):
             if message.latitude and message.longitude:
                 return distance_between(myLat, myLon, message.latitude, message.longitude) / 1000

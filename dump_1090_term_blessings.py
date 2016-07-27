@@ -128,6 +128,7 @@ def record_positions_to_file(screen, filename):
                skm = (' dist: %.2f km' % kmdistance).replace(',','.')
 ##               print (skm)
                snearest=" nearest: "
+               mynearest=None
                sDateTime = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
                if kmdistance < MAX_DISTANCE:
                    # 2014-12-05_07:10:58 flugdaten anzahl:23
@@ -141,7 +142,7 @@ def record_positions_to_file(screen, filename):
                            minAlt=ialt #save lowest altitude
                        #get flight with nearest view distance
                        mynearest=getnearest(collection)
-                       if mynearest:
+                       if mynearest != None:
                            snearest+= ("%.2f" % mynearest.abs_distance)
                            #if USE_NOISE:
                            #    mynearest._noise=getdata()
@@ -160,7 +161,7 @@ def record_positions_to_file(screen, filename):
                hours, rest = divmod(time_taken,3600)
                minutes, seconds = divmod(rest, 60)
                if minutes >= UPDATE_INTERVAL: #5:
-                   if mynearest:
+                   if mynearest != None:
                        if USE_FHEM:
                            senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg, mynearest.min_ground_speed)
                    starttime=time()

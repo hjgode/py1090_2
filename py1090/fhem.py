@@ -31,7 +31,7 @@ def senddata0(flight, viewdistance, noise, callback, ground_speed):
         tn.read_until("fhem> ".encode(),2)
            
         #send data now
-        data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+";"+"; setreading fluglaerm ground_speed "+strformat(ground_speed)+";"
+        data="setreading fluglaerm distance "+strformat(viewdistance)+ "; setreading fluglaerm callsign "+flight+"; setreading fluglaerm noise "+strformat(noise)+"; setreading fluglaerm ground_speed "+strformat(ground_speed)+";"
         tn.write(data.encode())    
         tn.read_until("fhem> ".encode(),2)
             

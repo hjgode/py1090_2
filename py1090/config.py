@@ -9,6 +9,7 @@ USE_FHEM=True #use telnet to update noise data within fhem
 MAX_DISTANCE=30 #km distance to log
 MAX_ALTITUDE=5000  # m altitude to log
 UPDATE_INTERVAL=1 #minutes to update log file
+UPDATE_INTERVAL_LOG=60 #minutes to update log file
 
 CLEANUP_TIMEOUT=1 #minutes a flight has to be last seen before cleanup
 #local position

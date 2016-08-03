@@ -55,7 +55,7 @@ def filtercollection(_flightcollection, disp):
         disp.print_msg("DIST removed "+i+ "     ")
 
 #    return;
-	
+    
     toremove=[]
     for f in _flightcollection:
         lastAltitude=f.last_altitude;
@@ -83,6 +83,7 @@ def getnearest(_flightcollection):
     return mynearest
 
 def record_positions_to_file(screen, filename):
+    minutes_for_log=0
     if USE_BLESSING==False:
         disp = display(screen)
     else:
@@ -109,17 +110,17 @@ def record_positions_to_file(screen, filename):
             message = Message.from_string(line)
 ##            print("trans type: ", message.transmission_type, message.aircraft_id, message.flight_id, message.callsign)
             collection.add(message)
-			
+            
 ##            disp.add_line(line) '  use single msg add
             
             if message.record_time:
                 cleanup(collection, message.record_time)
             filtercollection(collection, disp)
-			#add noise measure to message data
+            #add noise measure to message data
             if USE_NOISE:
                 n=mynoise.get_noise()
                 message.set_noise(n)
-				    
+                    
             disp.set_coll(collection,message.record_time)
             disp.print_msg(line)
 
@@ -165,16 +166,20 @@ def record_positions_to_file(screen, filename):
                        if USE_FHEM:
                            senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg, mynearest.min_ground_speed)
                    starttime=time()
-##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
-                   file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')
-                   file.flush()
-                   minAlt=100000
-                   # check for month roll-over and use new file
-                   if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":
+                   minutes_for_log+=1
+                   #write filelog UPDATE_INTERVAL_LOG
+                   if (minutes_for_log > UPDATE_INTERVAL_LOG):
+                       minutes_for_log=0
+    ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
+                       file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')
                        file.flush()
-                       file.close()
-                       filename = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
-                       file=open(filename, 'a')
+                       minAlt=100000
+                       # check for month roll-over and use new file
+                       if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":
+                           file.flush()
+                           file.close()
+                           filename = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"
+                           file=open(filename, 'a')
 
 def main(screen):
     sfile = "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log"

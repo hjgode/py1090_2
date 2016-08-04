@@ -6,6 +6,8 @@ from py1090.fhem import *
 
 from py1090.config import *
 
+#TODO: use different collections for fhem (every minute) and filelog (every hour)
+
 if USE_BLESSING:
     from py1090.display_blessing import *
 else:
@@ -92,6 +94,7 @@ def record_positions_to_file(screen, filename):
     if USE_NOISE:
         mynoise = json_noise(disp.print_msg)
     collection = FlightCollection()
+    collection_hour = FlightCollection() # second collection to cout airplanes per hour
     starttime = time()
     minAlt = 100000
     if USE_SERIAL:
@@ -108,18 +111,18 @@ def record_positions_to_file(screen, filename):
             logmsg.write(line)
             logmsg.flush()
             message = Message.from_string(line)
+            #add noise measure to message data
+            if USE_NOISE:
+                n=mynoise.get_noise()
+                message.set_noise(n)
 ##            print("trans type: ", message.transmission_type, message.aircraft_id, message.flight_id, message.callsign)
             collection.add(message)
-            
+            collection_hour.add(message)
 ##            disp.add_line(line) '  use single msg add
             
             if message.record_time:
                 cleanup(collection, message.record_time)
             filtercollection(collection, disp)
-            #add noise measure to message data
-            if USE_NOISE:
-                n=mynoise.get_noise()
-                message.set_noise(n)
                     
             disp.set_coll(collection,message.record_time)
             disp.print_msg(line)
@@ -161,7 +164,7 @@ def record_positions_to_file(screen, filename):
                time_taken = end_time - starttime # time_taken is in seconds
                hours, rest = divmod(time_taken,3600)
                minutes, seconds = divmod(rest, 60)
-               if minutes >= UPDATE_INTERVAL: #5:
+               if minutes >= UPDATE_INTERVAL: #1:
                    if mynearest != None:
                        if USE_FHEM:
                            senddata(mynearest.callsign, ndist, mynearest.noise, disp.print_msg, mynearest.min_ground_speed)
@@ -170,9 +173,14 @@ def record_positions_to_file(screen, filename):
                    #write filelog UPDATE_INTERVAL_LOG
                    if (minutes_for_log > UPDATE_INTERVAL_LOG):
                        minutes_for_log=0
+                       mynearest_hour=getnearest(collection_hour)
+                       snearest_hour=" nearest: "
+                       if mynearest_hour != None:
+                           snearest_hour+= ("%.2f" % mynearest_hour.abs_distance)
     ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
-                       file.write(sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest + '\n')
+                       file.write(sDateTime + " flugdaten anzahl: " + str(len(collection_hour)) + snearest + '\n')
                        file.flush()
+                       collection_hour=FlightCollection() # clear
                        minAlt=100000
                        # check for month roll-over and use new file
                        if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":

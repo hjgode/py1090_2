@@ -25,7 +25,10 @@ class FlightCollection:
 
     def __iter__(self):
         return iter(self._dictionary.values())
-    
+
+    def clear(self):
+        self._dictionary.clear()
+		    
     def remove(self,ident):
         del self._dictionary[ident]
         

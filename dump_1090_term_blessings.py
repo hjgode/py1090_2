@@ -7,6 +7,18 @@ from py1090.fhem import *
 from py1090.config import *
 
 #TODO: use different collections for fhem (every minute) and filelog (every hour)
+#TODO decouple receive and log writing in seprate thread, currently the minutes timespan is influenced
+#     if no message is received nothing will be logged
+# from threading import *
+# myLock=Lock()
+# with myLock:
+#     do something with shared data
+# -or-
+# try:
+#     myLock.acquire()
+#     do something
+# finally:
+#     myLock.release()
 
 if USE_BLESSING:
     from py1090.display_blessing import *
@@ -43,7 +55,7 @@ def cleanup(_flightcollection, _record_time):
 def filtercollection(_flightcollection, disp):
     if not USE_FILTER:
         return
-    """find flights which last_seen older than 5 minutes and clean this
+    """find flights which are "outside" view
     returns Nothing
     """
     toremove=[]
@@ -112,17 +124,18 @@ def record_positions_to_file(screen, filename):
             logmsg.flush()
             message = Message.from_string(line)
             #add noise measure to message data
-            if USE_NOISE:
-                n=mynoise.get_noise()
-                message.set_noise(n)
 ##            print("trans type: ", message.transmission_type, message.aircraft_id, message.flight_id, message.callsign)
             collection.add(message)
             collection_hour.add(message)
 ##            disp.add_line(line) '  use single msg add
             
+            if USE_NOISE:
+               n=mynoise.get_noise()
+               message.set_noise(n)
             if message.record_time:
                 cleanup(collection, message.record_time)
             filtercollection(collection, disp)
+            filtercollection(collection_hour, disp)
                     
             disp.set_coll(collection,message.record_time)
             disp.print_msg(line)
@@ -180,7 +193,7 @@ def record_positions_to_file(screen, filename):
     ##                   print("fileLog: " + sDateTime + " flugdaten anzahl: " + str(len(collection)) + skm + sAlt + snearest)
                        file.write(sDateTime + " flugdaten anzahl: " + str(len(collection_hour)) + snearest + '\n')
                        file.flush()
-                       collection_hour=FlightCollection() # clear
+                       collection_hour.clear() # clear
                        minAlt=100000
                        # check for month roll-over and use new file
                        if filename != "/opt/fhem/log/FileLog_Flugdaten-" + datetime.datetime.now().strftime('%Y-%m') + ".log":
